@@ -16,6 +16,30 @@ const envSchema = z.object({
     .string()
     .default("http://localhost:3000,http://localhost:5173"),
   LOG_LEVEL: z.enum(["error", "warn", "info", "debug"]).default("info"),
+
+  // Contentstack configuration
+  CONTENTSTACK_API_KEY: z.string().optional(),
+  CONTENTSTACK_DELIVERY_TOKEN: z.string().optional(),
+  CONTENTSTACK_ENVIRONMENT: z.string().default("development"),
+  CONTENTSTACK_REGION: z.string().default("us"),
+
+  // Cache configuration
+  REDIS_URL: z.string().optional(),
+  REDIS_TTL: z.string().default("3600").transform(Number),
+  CACHE_ENABLED: z
+    .string()
+    .default("true")
+    .transform((val) => val === "true"),
+  CACHE_TTL_SECONDS: z.string().default("3600").transform(Number),
+  MEMORY_CACHE_MAX_ITEMS: z.string().default("1000").transform(Number),
+
+  // Content search configuration
+  CONTENT_SEARCH_LIMIT: z.string().default("10").transform(Number),
+  CONTENT_RELEVANCE_THRESHOLD: z.string().default("0.3").transform(Number),
+  ENABLE_SEMANTIC_SEARCH: z
+    .string()
+    .default("true")
+    .transform((val) => val === "true"),
 });
 
 export const validateEnv = (): EnvConfig => {
@@ -32,6 +56,24 @@ export const validateEnv = (): EnvConfig => {
         origin.trim()
       ),
       logLevel: parsed.LOG_LEVEL,
+
+      // Contentstack configuration
+      contentstackApiKey: parsed.CONTENTSTACK_API_KEY,
+      contentstackDeliveryToken: parsed.CONTENTSTACK_DELIVERY_TOKEN,
+      contentstackEnvironment: parsed.CONTENTSTACK_ENVIRONMENT,
+      contentstackRegion: parsed.CONTENTSTACK_REGION,
+
+      // Cache configuration
+      redisUrl: parsed.REDIS_URL,
+      redisTtl: parsed.REDIS_TTL,
+      cacheEnabled: parsed.CACHE_ENABLED,
+      cacheTtlSeconds: parsed.CACHE_TTL_SECONDS,
+      memoryCacheMaxItems: parsed.MEMORY_CACHE_MAX_ITEMS,
+
+      // Content search configuration
+      contentSearchLimit: parsed.CONTENT_SEARCH_LIMIT,
+      contentRelevanceThreshold: parsed.CONTENT_RELEVANCE_THRESHOLD,
+      enableSemanticSearch: parsed.ENABLE_SEMANTIC_SEARCH,
     };
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -51,6 +93,13 @@ export const config = validateEnv();
 // Validate critical environment variables on startup
 if (!config.groqApiKey) {
   throw new Error("GROQ_API_KEY environment variable is required");
+}
+
+// Warn about Contentstack configuration
+if (!config.contentstackApiKey || !config.contentstackDeliveryToken) {
+  console.warn(
+    "⚠️  Contentstack credentials not provided. MCP features will be disabled."
+  );
 }
 
 export default config;

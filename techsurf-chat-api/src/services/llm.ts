@@ -4,7 +4,7 @@ import { LLMResponse, ChatMessage } from "../types";
 
 export class LLMService {
   private groq: Groq;
-  private readonly model = "llama-3.1-70b-versatile";
+  private readonly model = "llama-3.1-8b-instant"; // ✅ UPDATED: Use supported model
 
   constructor() {
     this.groq = new Groq({
@@ -14,10 +14,20 @@ export class LLMService {
 
   async generateResponse(
     messages: ChatMessage[],
-    stream: boolean = false
+    stream: boolean = false,
+    options: {
+      useContentstack?: boolean;
+      contentTypes?: string[];
+      maxContextLength?: number;
+    } = {}
   ): Promise<LLMResponse | AsyncIterable<string>> {
     try {
-      const groqMessages = this.formatMessagesForGroq(messages);
+      let processedMessages = messages;
+
+      // Note: Contentstack enhancement disabled for now to avoid errors
+      // This can be re-enabled once MCP services are properly configured
+
+      const groqMessages = this.formatMessagesForGroq(processedMessages);
 
       if (stream) {
         return this.createStreamingResponse(groqMessages);
@@ -120,15 +130,16 @@ export class LLMService {
     }
   }
 
-  // Get available models
+  // Get available models - UPDATED with working models
   async getAvailableModels(): Promise<string[]> {
     try {
-      // Groq doesn't have a models endpoint yet, so we return known models
       return [
-        "llama-3.1-70b-versatile",
-        "llama-3.1-8b-instant",
+        "llama-3.1-8b-instant", // ✅ PRIMARY MODEL (fast and reliable)
+        "llama-3.2-1b-preview",
+        "llama-3.2-3b-preview",
         "mixtral-8x7b-32768",
         "gemma-7b-it",
+        "gemma2-9b-it",
       ];
     } catch (error) {
       console.error("Failed to get available models:", error);
@@ -149,11 +160,11 @@ export class LLMService {
     }
   }
 
-  // Get model information
+  // Get model information - UPDATED
   getModelInfo(): { name: string; description: string; maxTokens: number } {
     return {
       name: this.model,
-      description: "Llama 3.1 70B - Fast and versatile large language model",
+      description: "Llama 3.1 8B Instant - Fast and reliable language model",
       maxTokens: 8192,
     };
   }

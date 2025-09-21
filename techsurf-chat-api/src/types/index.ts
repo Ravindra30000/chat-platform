@@ -12,6 +12,7 @@ export interface ChatRequest {
   userId?: string;
   context?: Record<string, unknown>;
   stream?: boolean;
+  useContentstack?: boolean;
 }
 
 export interface ChatResponse {
@@ -24,6 +25,7 @@ export interface ChatResponse {
     completionTokens: number;
     totalTokens: number;
   };
+  contentStackResults?: ContentstackResult[];
 }
 
 export interface StreamChunk {
@@ -75,6 +77,8 @@ export interface HealthStatus {
   uptime: number;
   dependencies: {
     groq: "connected" | "disconnected";
+    contentstack: "connected" | "disconnected";
+    cache: "connected" | "disconnected";
     [key: string]: "connected" | "disconnected";
   };
 }
@@ -95,6 +99,114 @@ export interface EnvConfig {
   rateLimitMaxRequests: number;
   allowedOrigins: string[];
   logLevel: "error" | "warn" | "info" | "debug";
+  // Contentstack configuration
+  contentstackApiKey?: string;
+  contentstackDeliveryToken?: string;
+  contentstackEnvironment?: string;
+  contentstackRegion?: string;
+  // Cache configuration
+  redisUrl?: string;
+  redisTtl?: number;
+  cacheEnabled?: boolean;
+  cacheTtlSeconds?: number;
+  memoryCacheMaxItems?: number;
+  // Content search configuration
+  contentSearchLimit?: number;
+  contentRelevanceThreshold?: number;
+  enableSemanticSearch?: boolean;
+}
+
+// Contentstack MCP Types
+export interface ContentstackConfig {
+  apiKey: string;
+  deliveryToken: string;
+  environment: string;
+  region?: string;
+}
+
+export interface ContentstackEntry {
+  uid: string;
+  title?: string;
+  url?: string;
+  content_type_uid: string;
+  locale: string;
+  created_at: string;
+  updated_at: string;
+  [key: string]: any;
+}
+
+export interface ContentstackResult {
+  entry: ContentstackEntry;
+  relevanceScore: number;
+  contentType: string;
+  extractedText: string;
+  metadata: {
+    title?: string;
+    description?: string;
+    tags?: string[];
+    category?: string;
+  };
+}
+
+export interface ContentSearchQuery {
+  query: string;
+  contentTypes?: string[];
+  limit?: number;
+  locale?: string;
+  filters?: Record<string, any>;
+  includeFields?: string[];
+  excludeFields?: string[];
+}
+
+export interface ContentSearchResult {
+  results: ContentstackResult[];
+  totalCount: number;
+  searchQuery: string;
+  executionTime: number;
+  cacheHit: boolean;
+}
+
+export interface MCPResponse {
+  success: boolean;
+  data?: ContentSearchResult;
+  error?: string;
+  cached?: boolean;
+  executionTime: number;
+}
+
+// Cache-related types
+export interface CacheEntry<T = any> {
+  data: T;
+  timestamp: number;
+  ttl: number;
+  key: string;
+}
+
+export interface CacheStats {
+  hits: number;
+  misses: number;
+  sets: number;
+  deletes: number;
+  size: number;
+  hitRate: number;
+}
+
+// Content matching types
+export interface MatchingOptions {
+  threshold: number;
+  includeMetadata: boolean;
+  maxResults: number;
+  boostFields?: Record<string, number>;
+}
+
+export interface SemanticMatchResult {
+  content: ContentstackEntry;
+  score: number;
+  matches: {
+    field: string;
+    value: string;
+    score: number;
+  }[];
 }
 
 // Request/Response extended types for Express
@@ -108,6 +220,7 @@ declare global {
       };
       rateLimitInfo?: RateLimitInfo;
       requestId: string;
+      contentContext?: ContentstackResult[];
     }
   }
 }
