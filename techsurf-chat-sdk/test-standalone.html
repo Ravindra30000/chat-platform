@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechSurf Chat SDK - Standalone Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status-card {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .status-success { 
+            background: #d4f8d4; 
+            color: #2d5a2d; 
+            border-left: 4px solid #28a745;
+        }
+        .status-error { 
+            background: #fdd4d4; 
+            color: #8b0000; 
+            border-left: 4px solid #dc3545;
+        }
+        .status-info { 
+            background: #d4e8f8; 
+            color: #1e4d72; 
+            border-left: 4px solid #007bff;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        button:hover { 
+            background: #0056b3; 
+            transform: translateY(-1px);
+        }
+        button:disabled { 
+            background: #ccc; 
+            cursor: not-allowed; 
+            transform: none;
+        }
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .feature {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        .feature h4 {
+            margin: 0 0 10px 0;
+            color: #007bff;
+        }
+        code {
+            background: #f1f1f1;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 TechSurf 2025 Chat SDK</h1>
+            <p>Standalone Widget Test - No Build Required!</p>
+        </div>
+        
+        <div id="status" class="status-card status-info">
+            <div>🔄</div>
+            <div>Initializing chat widget...</div>
+        </div>
+        
+        <div class="controls">
+            <button id="testApi">Test API Connection</button>
+            <button id="openChat">Open Chat</button>
+            <button id="closeChat">Close Chat</button>
+            <button id="clearMessages">Clear Messages</button>
+        </div>
+        
+        <div class="feature-list">
+            <div class="feature">
+                <h4>✅ Features Working</h4>
+                <ul>
+                    <li>Real-time chat interface</li>
+                    <li>TechSurf API integration</li>
+                    <li>Contentstack MCP support</li>
+                    <li>Mobile responsive design</li>
+                    <li>Auto-scroll messages</li>
+                    <li>Connection status indicator</li>
+                </ul>
+            </div>
+            
+            <div class="feature">
+                <h4>🎯 How to Test</h4>
+                <ol>
+                    <li>Start your TechSurf API: <code>npm run dev</code></li>
+                    <li>Look for chat bubble (bottom-right)</li>
+                    <li>Click bubble to open chat</li>
+                    <li>Send test message</li>
+                    <li>Check browser console for logs</li>
+                </ol>
+            </div>
+            
+            <div class="feature">
+                <h4>🔧 API Integration</h4>
+                <p>Connecting to: <code>http://localhost:3001</code></p>
+                <p>Uses endpoints:</p>
+                <ul>
+                    <li><code>GET /health</code></li>
+                    <li><code>POST /api/chat</code></li>
+                </ul>
+            </div>
+            
+            <div class="feature">
+                <h4>📱 Responsive Design</h4>
+                <p>Try resizing your browser window or testing on mobile. The chat adapts to different screen sizes automatically.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load the standalone widget -->
+    <script src="./standalone-widget.js"></script>
+    
+    <script>
+        const statusEl = document.getElementById('status');
+        let chatWidget = null;
+
+        // Update status display
+        function updateStatus(message, type = 'info', icon = '🔄') {
+            statusEl.innerHTML = `<div>${icon}</div><div>${message}</div>`;
+            statusEl.className = `status-card status-${type}`;
+        }
+
+        // Initialize chat widget
+        function initChat() {
+            try {
+                updateStatus('Creating TechSurf chat widget...', 'info', '🔄');
+                
+                chatWidget = new TechSurfChatWidget({
+                    apiUrl: 'http://localhost:3001',
+                    title: '🚀 TechSurf Assistant',
+                    placeholder: 'Ask me anything about TechSurf...',
+                    useContentstack: true,
+                    contentTypes: ['article', 'faq', 'help'],
+                    onMessage: (message) => {
+                        console.log('✅ Message received:', message);
+                        updateStatus(`Message received: "${message.content.substring(0, 40)}..."`, 'success', '💬');
+                    },
+                    onError: (error) => {
+                        console.error('❌ Chat error:', error);
+                        updateStatus(`Chat error: ${error.message}`, 'error', '❌');
+                    },
+                    onConnect: () => {
+                        console.log('✅ Chat connected to API');
+                        updateStatus('✅ Chat connected to TechSurf API - Ready to use!', 'success', '🚀');
+                    }
+                });
+                
+                // Enable controls
+                document.getElementById('openChat').disabled = false;
+                document.getElementById('closeChat').disabled = false;
+                document.getElementById('clearMessages').disabled = false;
+                
+            } catch (error) {
+                console.error('Failed to create chat widget:', error);
+                updateStatus(`Failed to create chat widget: ${error.message}`, 'error', '❌');
+            }
+        }
+
+        // Test API connection
+        async function testApiConnection() {
+            updateStatus('Testing TechSurf API connection...', 'info', '🔍');
+            
+            try {
+                const response = await fetch('http://localhost:3001/health');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    updateStatus(`✅ API Connected! Status: ${data.status} | Dependencies: Groq(${data.dependencies?.groq || 'unknown'})`, 'success', '✅');
+                } else {
+                    updateStatus(`⚠️ API returned status ${response.status}. Check if TechSurf API is running.`, 'error', '⚠️');
+                }
+            } catch (error) {
+                updateStatus('❌ Cannot connect to API. Make sure TechSurf API is running on localhost:3001', 'error', '❌');
+                console.error('API test failed:', error);
+            }
+        }
+
+        // Control functions
+        function openChat() {
+            if (chatWidget) {
+                chatWidget.open();
+                updateStatus('Chat opened - Try sending a message!', 'info', '💬');
+            }
+        }
+
+        function closeChat() {
+            if (chatWidget) {
+                chatWidget.close();
+                updateStatus('Chat closed', 'info', '📱');
+            }
+        }
+
+        function clearMessages() {
+            if (chatWidget) {
+                chatWidget.clearMessages();
+                updateStatus('Chat messages cleared', 'info', '🗑️');
+            }
+        }
+
+        // Event listeners
+        document.getElementById('testApi').addEventListener('click', testApiConnection);
+        document.getElementById('openChat').addEventListener('click', openChat);
+        document.getElementById('closeChat').addEventListener('click', closeChat);
+        document.getElementById('clearMessages').addEventListener('click', clearMessages);
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 TechSurf Chat SDK Test Page Loaded');
+            
+            // Small delay to ensure everything is ready
+            setTimeout(() => {
+                initChat();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

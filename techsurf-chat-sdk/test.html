@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechSurf Chat SDK Test</title>
+    <!-- Correct paths - files are in the same directory -->
+    <link rel="stylesheet" href="./dist/index.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Inter, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+        .status.success { background: #d4f8d4; color: #2d5a2d; }
+        .status.error { background: #fdd4d4; color: #8b0000; }
+        .status.info { background: #d4e8f8; color: #1e4d72; }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { 
+            background: #ccc; 
+            cursor: not-allowed; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 TechSurf 2025 Chat SDK Test</h1>
+        <div id="status" class="status info">Loading SDK...</div>
+        
+        <div class="controls">
+            <button id="showChat">Show Chat Widget</button>
+            <button id="hideChat" disabled>Hide Chat Widget</button>
+            <button id="testConnection">Test API Connection</button>
+        </div>
+        
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Make sure your TechSurf API is running on <code>http://localhost:3001</code></li>
+            <li>Click "Show Chat Widget" to display the chat</li>
+            <li>Try sending a message to test the integration</li>
+            <li>Check browser console for debug information</li>
+        </ol>
+        
+        <!-- Chat widget will appear here -->
+        <div id="chat-container"></div>
+    </div>
+
+    <!-- Import React and ReactDOM from CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <script type="module">
+        const statusEl = document.getElementById('status');
+        const showBtn = document.getElementById('showChat');
+        const hideBtn = document.getElementById('hideChat');
+        const testBtn = document.getElementById('testConnection');
+        const container = document.getElementById('chat-container');
+        
+        let ChatWidget = null;
+        let currentWidget = null;
+        
+        // Update status
+        function updateStatus(message, type = 'info') {
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+        }
+        
+        // Load the SDK
+        async function loadSDK() {
+            try {
+                updateStatus('Loading TechSurf Chat SDK...', 'info');
+                
+                // Import the built SDK
+                const module = await import('./dist/index.esm.js');
+                ChatWidget = module.ChatWidget || module.default;
+                
+                if (!ChatWidget) {
+                    throw new Error('ChatWidget not found in module');
+                }
+                
+                updateStatus('✅ SDK loaded successfully! Ready to test.', 'success');
+                showBtn.disabled = false;
+                testBtn.disabled = false;
+                
+            } catch (error) {
+                console.error('Failed to load SDK:', error);
+                updateStatus(`❌ Failed to load SDK: ${error.message}`, 'error');
+            }
+        }
+        
+        // Test API connection
+        async function testConnection() {
+            updateStatus('Testing API connection...', 'info');
+            try {
+                const response = await fetch('http://localhost:3001/health');
+                if (response.ok) {
+                    const data = await response.json();
+                    updateStatus(`✅ API Connected! Status: ${data.status}`, 'success');
+                } else {
+                    updateStatus(`⚠️ API responded with status: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                updateStatus(`❌ API Connection failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // Show chat widget
+        function showChat() {
+            if (!ChatWidget) {
+                updateStatus('❌ SDK not loaded yet', 'error');
+                return;
+            }
+            
+            try {
+                updateStatus('Creating chat widget...', 'info');
+                
+                // Create chat widget using React
+                const widget = React.createElement(ChatWidget, {
+                    apiUrl: 'http://localhost:3001',
+                    title: '🚀 TechSurf Chat',
+                    placeholder: 'Test your message here...',
+                    theme: {
+                        primaryColor: '#007bff',
+                        fontFamily: 'Inter, sans-serif'
+                    },
+                    useContentstack: true,
+                    position: 'bottom-right',
+                    onMessage: (message) => {
+                        console.log('New message:', message);
+                        updateStatus(`✅ Message received: ${message.content.substring(0, 50)}...`, 'success');
+                    },
+                    onError: (error) => {
+                        console.error('Chat error:', error);
+                        updateStatus(`❌ Chat error: ${error.message}`, 'error');
+                    },
+                    onConnect: () => {
+                        console.log('Chat connected');
+                        updateStatus('✅ Chat connected to API', 'success');
+                    },
+                    onDisconnect: () => {
+                        console.log('Chat disconnected');
+                        updateStatus('⚠️ Chat disconnected from API', 'error');
+                    }
+                });
+                
+                // Render the widget
+                ReactDOM.render(widget, container);
+                currentWidget = widget;
+                
+                showBtn.disabled = true;
+                hideBtn.disabled = false;
+                updateStatus('✅ Chat widget created! Try sending a message.', 'success');
+                
+            } catch (error) {
+                console.error('Failed to create widget:', error);
+                updateStatus(`❌ Failed to create widget: ${error.message}`, 'error');
+            }
+        }
+        
+        // Hide chat widget
+        function hideChat() {
+            try {
+                ReactDOM.unmountComponentAtNode(container);
+                currentWidget = null;
+                showBtn.disabled = false;
+                hideBtn.disabled = true;
+                updateStatus('Chat widget hidden', 'info');
+            } catch (error) {
+                console.error('Failed to hide widget:', error);
+                updateStatus(`❌ Failed to hide widget: ${error.message}`, 'error');
+            }
+        }
+        
+        // Event listeners
+        showBtn.addEventListener('click', showChat);
+        hideBtn.addEventListener('click', hideChat);
+        testBtn.addEventListener('click', testConnection);
+        
+        // Initialize
+        loadSDK();
+    </script>
+</body>
+</html>

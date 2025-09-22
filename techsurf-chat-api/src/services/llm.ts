@@ -24,6 +24,13 @@ export class LLMService {
     try {
       let processedMessages = messages;
 
+      console.log('🔍 LLM Service - useContentstack:', options?.useContentstack);
+console.log('🔍 LLM Service - contentTypes:', options?.contentTypes);
+
+if (options?.useContentstack) {
+  console.log('🧠 Attempting to enhance with Contentstack...');
+  // Your Contentstack integration code
+}
       // Note: Contentstack enhancement disabled for now to avoid errors
       // This can be re-enabled once MCP services are properly configured
 

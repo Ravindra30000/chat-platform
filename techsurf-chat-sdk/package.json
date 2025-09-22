@@ -1,0 +1,83 @@
+{
+  "name": "@techsurf/chat-sdk",
+  "version": "1.0.0",
+  "description": "Embeddable React chat widget SDK for TechSurf 2025 chat platform with streaming support and Contentstack MCP integration",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "keywords": [
+    "react",
+    "chat",
+    "widget",
+    "sdk",
+    "embedding",
+    "ai",
+    "llm",
+    "streaming",
+    "sse",
+    "contentstack",
+    "mcp",
+    "techsurf",
+    "typescript"
+  ],
+  "author": "TechSurf 2025 Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ravindra30000/chat-platform.git",
+    "directory": "techsurf-chat-sdk"
+  },
+  "homepage": "https://github.com/Ravindra30000/chat-platform#readme",
+  "bugs": {
+    "url": "https://github.com/Ravindra30000/chat-platform/issues"
+  },
+  "scripts": {
+    "build": "vite build",
+    "build:watch": "vite build --watch",
+    "dev": "vite build --watch --mode development",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "clean": "rimraf dist",
+    "prepare": "npm run build",
+    "size-limit": "size-limit",
+    "analyze": "npm run build && npx vite-bundle-analyzer dist/stats.html"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.17",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "eslint": "^8.45.0",
+    "eslint-plugin-react": "^7.33.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.0",
+    "rimraf": "^5.0.0",
+    "rollup-plugin-visualizer": "^5.9.0",
+    "terser": "^5.44.0",
+    "typescript": "^5.2.0",
+    "vite": "^5.0.0",
+    "vite-plugin-dts": "^3.6.0"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
+  }
+}
